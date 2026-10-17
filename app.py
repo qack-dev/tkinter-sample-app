@@ -5,8 +5,6 @@ Windows 11環境向け Python標準ライブラリのみで構成されたGUIサ
 """
 
 import os
-import subprocess
-import sys
 import tkinter as tk
 from tkinter import filedialog, ttk
 
@@ -16,7 +14,18 @@ from tkinter import filedialog, ttk
 APP_TITLE: str = "Tkinterサンプルアプリ"
 INITIAL_DIR: str = os.getcwd()  # 初期表示フォルダ（カレントディレクトリ）
 FILE_TYPES: list[tuple[str, str]] = [("すべてのファイル", "*.*")]  # 選択可能な拡張子
-CONSOLE_EXIT_MESSAGE: str = "Enterキーを押下し終了してください。"  # 終了案内メッセージ
+
+
+def print_input(folder_path: str, file_path: str, input_text: str) -> None:
+    """入力内容をコマンドプロンプトにprint関数で出力"""
+    print("========================================")
+    print("[入力内容の確認]")
+    print("========================================")
+    print(f"フォルダパス : {folder_path or '(未選択)'}")
+    print(f"ファイルパス : {file_path or '(未選択)'}")
+    print(f"入力文字     : {input_text or '(未入力)'}")
+    print("========================================")
+    print()
 
 
 class App(tk.Tk):
@@ -75,7 +84,7 @@ class App(tk.Tk):
         btn_file.grid(row=1, column=2, sticky=tk.E, pady=6)
 
         # ----------------------------------------------------------------------
-        # 行3: 文字入力
+        # 行3: 文字入力（幅6、左寄せ）
         # ----------------------------------------------------------------------
         lbl_text = ttk.Label(main_frame, text="文字を入力:")
         lbl_text.grid(row=2, column=0, sticky=tk.W, padx=(0, 8), pady=6)
@@ -123,37 +132,12 @@ class App(tk.Tk):
             self.file_path_var.set(os.path.normpath(selected_file))
 
     def _execute(self) -> None:
-        """
-        実行ボタン押下時の処理:
-        新しいコマンドプロンプトウィンドウ（cmd.exe）をポップアップ起動し、
-        入力内容を表示してEnterキーの入力を待機
-        """
-        folder_path = self.folder_path_var.get() or "(未選択)"
-        file_path = self.file_path_var.get() or "(未選択)"
-        input_text = self.input_text_var.get() or "(未入力)"
+        """実行ボタン押下時の処理: print_inputを直接呼び出してコンソールに出力"""
+        folder_path = self.folder_path_var.get()
+        file_path = self.file_path_var.get()
+        input_text = self.input_text_var.get()
 
-        # コマンドプロンプトに送るコマンドを構築
-        cmd_command = (
-            f"echo ======================================== & "
-            f"echo [入力内容の確認] & "
-            f"echo ======================================== & "
-            f"echo フォルダパス : {folder_path} & "
-            f"echo ファイルパス : {file_path} & "
-            f"echo 入力文字     : {input_text} & "
-            f"echo ======================================== & "
-            f"echo. & "
-            f'set /p "={CONSOLE_EXIT_MESSAGE}"'
-        )
-
-        # Windows上で新しいコンソールウィンドウを独立して起動
-        creation_flags = (
-            subprocess.CREATE_NEW_CONSOLE if sys.platform == "win32" else 0
-        )
-
-        subprocess.Popen(
-            ["cmd.exe", "/c", cmd_command],
-            creationflags=creation_flags,
-        )
+        print_input(folder_path, file_path, input_text)
 
 
 def main() -> None:
